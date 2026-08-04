@@ -1,0 +1,18 @@
+# Docs de pilotage locales
+COMMANDS.md
+MEMORY.md
+CHANGES.md
+TODOS.md
+PLAN.md
+
+# Xcode / build
+*.xcodeproj
+build/
+DerivedData/
+release/
+*.dmg
+*.zip
+
+# Divers
+.DS_Store
+.omc/

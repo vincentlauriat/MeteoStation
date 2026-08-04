@@ -1,0 +1,46 @@
+name: MeteoStation
+options:
+  bundleIdPrefix: com.vincentlauriat
+  deploymentTarget:
+    macOS: "14.0"
+
+schemes:
+  MeteoStation:
+    build:
+      targets:
+        MeteoStation: all
+    run:
+      config: Debug
+
+targets:
+  MeteoStation:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: MeteoStation
+        excludes:
+          - "**/*.entitlements"
+          - "Info.plist"
+    settings:
+      base:
+        PRODUCT_NAME: MeteoStation
+        PRODUCT_BUNDLE_IDENTIFIER: com.vincentlauriat.meteostation
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        SWIFT_VERSION: "5.9"
+        MARKETING_VERSION: "1.0.0"
+        CURRENT_PROJECT_VERSION: "1"
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
+        CODE_SIGN_ENTITLEMENTS: MeteoStation/MeteoStation.entitlements
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGNING_REQUIRED: NO
+    info:
+      path: MeteoStation/Info.plist
+      properties:
+        CFBundleName: MeteoStation
+        CFBundleDisplayName: MeteoStation
+        CFBundleIdentifier: com.vincentlauriat.meteostation
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        LSMinimumSystemVersion: "14.0"
+        NSHumanReadableCopyright: ""
