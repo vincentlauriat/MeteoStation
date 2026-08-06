@@ -155,7 +155,7 @@ struct WaitingBanner: View {
                 Text("En attente de données de la station…")
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white)
-                Text("Dans WSLink → service personnalisé : serveur \(model.localIP), port \(String(model.port)), chemin /weatherstation/updateweatherstation.php (protocole Wunderground).")
+                Text("Console en mode AP ([SENSOR/WI-FI] 6 s → WiFi PWS-XXXXXX → http://192.168.1.1) → service météo à URL libre : \(model.localIP):\(String(model.port)) (protocole Wunderground).")
                     .font(.system(size: 11, design: .rounded))
                     .foregroundStyle(ConsoleTheme.label)
                     .textSelection(.enabled)

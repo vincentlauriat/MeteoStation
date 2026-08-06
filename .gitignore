@@ -16,3 +16,4 @@ release/
 # Divers
 .DS_Store
 .omc/
+.sparkle-tools/

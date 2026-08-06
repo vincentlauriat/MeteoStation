@@ -17,7 +17,7 @@ struct SettingsView: View {
                         .onSubmit(applyPort)
                     Button("Appliquer", action: applyPort)
                 }
-                Text("À renseigner dans l'app WSLink (service météo personnalisé, protocole Wunderground) :\nserveur \(model.localIP) · port \(String(model.port)) · chemin /weatherstation/updateweatherstation.php")
+                Text("À renseigner dans la console en mode AP ([SENSOR/WI-FI] 6 s → WiFi PWS-XXXXXX → http://192.168.1.1), service météo à URL libre :\nURL \(model.localIP):\(String(model.port)) — ID/clé libres (protocole Wunderground)")
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)

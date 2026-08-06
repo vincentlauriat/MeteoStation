@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>MeteoStation</title>
+    <link>https://raw.githubusercontent.com/vincentlauriat/MeteoStation/main/appcast.xml</link>
+    <description>MeteoStation release feed</description>
+    <language>en</language>
+    <item>
+      <title>v1.0.0</title>
+      <pubDate>Thu, 06 Aug 2026 18:37:20 +0200</pubDate>
+      <sparkle:version>1</sparkle:version>
+      <sparkle:shortVersionString>1.0.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <sparkle:releaseNotesLink>https://github.com/vincentlauriat/MeteoStation/releases/tag/v1.0.0</sparkle:releaseNotesLink>
+      <enclosure
+        url="https://github.com/vincentlauriat/MeteoStation/releases/download/v1.0.0/MeteoStation-1.0.0.dmg"
+        type="application/octet-stream"
+        sparkle:edSignature="cVPoiCsFnApOz457OcGKM0Lbn4eMQJjHmkSjL01rCw98P1PkYkWwlQOsbhSvKB58oBPYnvdrlHLg8dkhDg/jDQ==" length="1902409" />
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MeteoStation — Your Bresser weather station on your Mac</title>
+<meta name="description" content="Native macOS app mirroring a Bresser Weather Center 7-in-1 console — all station data, live, fully local. Signed, notarized, auto-updating.">
+<link rel="icon" href="assets/icon-256.png">
+<style>
+  :root{
+    --bg:#0a0e16;--bg2:#101624;--card:#141b2c;--line:#243248;
+    --txt:#e9eef8;--sub:#9fb0c8;--acc:#7dd3fc;--acc2:#38bdf8;--grad:linear-gradient(135deg,#7dd3fc,#818cf8);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--txt);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:960px;margin:0 auto;padding:0 24px}
+  a{color:var(--acc)}
+  /* language switching */
+  .fr,.zh{display:none}
+  html[data-lang="fr"] .en,html[data-lang="fr"] .zh{display:none}
+  html[data-lang="fr"] .fr{display:inline}
+  html[data-lang="zh"] .en,html[data-lang="zh"] .fr{display:none}
+  html[data-lang="zh"] .zh{display:inline}
+  p .en,p .fr,p .zh,h1 .en,h1 .fr,h1 .zh,h2 .en,h2 .fr,h2 .zh,h3 .en,h3 .fr,h3 .zh{display:none}
+  html[data-lang="en"] .en{display:inline}
+  html[data-lang="fr"] .fr{display:inline}
+  html[data-lang="zh"] .zh{display:inline}
+  .langbar{position:fixed;top:14px;right:18px;z-index:10;display:flex;gap:4px;background:rgba(20,27,44,.85);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:999px;padding:4px}
+  .langbar button{background:none;border:none;color:var(--sub);font:13px/1 inherit;padding:6px 12px;border-radius:999px;cursor:pointer}
+  .langbar button.on{background:var(--acc);color:#071018;font-weight:600}
+  header{padding:88px 0 48px;text-align:center;background:radial-gradient(ellipse at 50% -20%,#1d2b47 0%,var(--bg) 62%)}
+  .appicon{width:128px;height:128px;margin-bottom:20px;border-radius:28px}
+  h1{font-size:clamp(30px,5vw,46px);line-height:1.15;font-weight:700;letter-spacing:-.02em}
+  .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .tagline{color:var(--sub);font-size:19px;max-width:680px;margin:18px auto 0}
+  .cta-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:32px}
+  .btn{display:inline-block;padding:13px 26px;border-radius:12px;font-weight:600;text-decoration:none}
+  .btn-dl{background:var(--grad);color:#071018}
+  .btn-gh{border:1px solid var(--line);color:var(--txt)}
+  .req{color:var(--sub);font-size:13px;margin-top:14px}
+  .shot{display:block;width:100%;max-width:880px;margin:56px auto 0;border-radius:14px;border:1px solid var(--line);box-shadow:0 24px 80px rgba(0,0,0,.5)}
+  section{padding:64px 0}
+  h2{font-size:28px;margin-bottom:28px;text-align:center}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px}
+  .card .ico{font-size:26px;margin-bottom:10px}
+  .card h3{font-size:17px;margin-bottom:8px}
+  .card p{color:var(--sub);font-size:14.5px}
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;counter-reset:step}
+  .step{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;counter-increment:step}
+  .step::before{content:counter(step);display:inline-flex;width:28px;height:28px;align-items:center;justify-content:center;background:var(--grad);color:#071018;font-weight:700;border-radius:8px;margin-bottom:12px}
+  .step h3{font-size:16px;margin-bottom:6px}
+  .step p{color:var(--sub);font-size:14px}
+  .note{max-width:720px;margin:0 auto;color:var(--sub);font-size:13.5px;text-align:center}
+  footer{border-top:1px solid var(--line);padding:36px 0;color:var(--sub);font-size:14px;text-align:center}
+  footer a{color:var(--sub)}
+</style>
+</head>
+<body>
+<div class="langbar" role="group" aria-label="Language">
+  <button data-l="en" class="on">EN</button><button data-l="fr">FR</button><button data-l="zh">中文</button>
+</div>
+
+<header>
+  <div class="wrap">
+    <img class="appicon" src="assets/icon-256.png" alt="MeteoStation icon">
+    <h1>
+      <span class="en">Your weather station, on your Mac.<br><span class="grad">Local. Real-time. No cloud.</span></span>
+      <span class="fr">Votre station météo, sur votre Mac.<br><span class="grad">Local. Temps réel. Sans cloud.</span></span>
+      <span class="zh">您的气象站，就在 Mac 上。<br><span class="grad">本地、实时、无云端。</span></span>
+    </h1>
+    <p class="tagline">
+      <span class="en">MeteoStation mirrors a Bresser Weather Center 7-in-1 console — the station pushes every reading straight to your Mac every ~5 seconds, over your own WiFi. No account, no cloud, no polling.</span>
+      <span class="fr">MeteoStation reproduit la console d'une Bresser Weather Center 7-in-1 — la station pousse chaque mesure directement vers votre Mac toutes les ~5 secondes, via votre propre WiFi. Sans compte, sans cloud.</span>
+      <span class="zh">MeteoStation 复刻 Bresser Weather Center 7-in-1 控制台——气象站每约 5 秒通过您自己的 WiFi 将读数直接推送到 Mac。无账户、无云端、无轮询。</span>
+    </p>
+    <div class="cta-row">
+      <a class="btn btn-dl" href="https://github.com/vincentlauriat/MeteoStation/releases/latest">
+        <span class="en">Download for macOS</span><span class="fr">Télécharger pour macOS</span><span class="zh">下载 macOS 版</span>
+      </a>
+      <a class="btn btn-gh" href="https://github.com/vincentlauriat/MeteoStation">GitHub</a>
+    </div>
+    <p class="req">
+      <span class="en">macOS 14+ · Developer ID signed & notarized · Sparkle 2 updates · MIT license</span>
+      <span class="fr">macOS 14+ · Signée Developer ID &amp; notariée · Mises à jour Sparkle 2 · Licence MIT</span>
+      <span class="zh">macOS 14+ · Developer ID 签名并经公证 · Sparkle 2 更新 · MIT 许可证</span>
+    </p>
+    <img class="shot" src="assets/screenshot.png" alt="MeteoStation console UI with live data">
+  </div>
+</header>
+
+<section id="features">
+  <div class="wrap">
+    <h2><span class="en">The real console, pixel for pixel</span><span class="fr">La vraie console, au pixel près</span><span class="zh">忠实还原真实控制台</span></h2>
+    <div class="cards">
+      <div class="card"><div class="ico">📡</div>
+        <h3><span class="en">Real-time push</span><span class="fr">Push temps réel</span><span class="zh">实时推送</span></h3>
+        <p><span class="en">The app embeds a tiny HTTP server; the console pushes Weather Underground frames to it every ~5 seconds. The app is the weather server.</span><span class="fr">L'app embarque un mini serveur HTTP ; la console y pousse ses trames Weather Underground toutes les ~5 secondes. L'app est le serveur météo.</span><span class="zh">应用内置微型 HTTP 服务器；控制台每约 5 秒推送一次 Weather Underground 数据帧。应用本身就是气象服务器。</span></p></div>
+      <div class="card"><div class="ico">🖥️</div>
+        <h3><span class="en">Console-style UI</span><span class="fr">Interface façon console</span><span class="zh">控制台风格界面</span></h3>
+        <p><span class="en">True 3×3 layout, DSEG 7-segment digits with ghost segments, wind compass, Beaufort scale, pressure graph, trend arrows, comfort smiley.</span><span class="fr">Grille 3×3 fidèle, chiffres 7 segments DSEG avec segments fantômes, boussole de vent, échelle de Beaufort, graphe de pression, flèches de tendance, smiley de confort.</span><span class="zh">忠实的 3×3 布局、DSEG 七段数码字体、风向罗盘、蒲福风级、气压曲线、趋势箭头、舒适度表情。</span></p></div>
+      <div class="card"><div class="ico">🌡️</div>
+        <h3><span class="en">Every sensor</span><span class="fr">Tous les capteurs</span><span class="zh">全部传感器</span></h3>
+        <p><span class="en">Outdoor & indoor temperature and humidity, dew point, feels-like, wind, gusts, rain, UV index, solar radiation, relative pressure.</span><span class="fr">Températures et humidités extérieure/intérieure, point de rosée, ressenti, vent, rafales, pluie, indice UV, rayonnement solaire, pression relative.</span><span class="zh">室外/室内温湿度、露点、体感温度、风速、阵风、降雨、UV 指数、太阳辐射、相对气压。</span></p></div>
+      <div class="card"><div class="ico">🌗</div>
+        <h3><span class="en">Sun &amp; moon</span><span class="fr">Soleil &amp; lune</span><span class="zh">日月信息</span></h3>
+        <p><span class="en">Sunrise/sunset computed locally (NOAA algorithm), moon phase, clock with seconds — no network lookup needed.</span><span class="fr">Lever/coucher du soleil calculés localement (algorithme NOAA), phase de lune, horloge avec secondes — aucun accès réseau nécessaire.</span><span class="zh">本地计算日出日落（NOAA 算法）、月相、带秒时钟——无需联网查询。</span></p></div>
+      <div class="card"><div class="ico">🔐</div>
+        <h3><span class="en">Private by design</span><span class="fr">Privé par conception</span><span class="zh">隐私优先</span></h3>
+        <p><span class="en">Everything stays on your LAN. Sandboxed app, 7-day local history, no account, no analytics, open source.</span><span class="fr">Tout reste sur votre réseau local. App sandboxée, historique local de 7 jours, pas de compte, zéro télémétrie, open source.</span><span class="zh">一切数据保留在局域网内。沙盒应用、7 天本地历史、无账户、无遥测、开源。</span></p></div>
+      <div class="card"><div class="ico">🚀</div>
+        <h3><span class="en">One-click updates</span><span class="fr">Mises à jour en un clic</span><span class="zh">一键更新</span></h3>
+        <p><span class="en">Sparkle 2 + notarized DMGs + EdDSA signatures — Check for Updates… downloads, swaps and relaunches.</span><span class="fr">Sparkle 2 + DMG notariés + signatures EdDSA — Rechercher les mises à jour… télécharge, remplace et relance.</span><span class="zh">Sparkle 2 + 已公证 DMG + EdDSA 签名——检查更新即可下载、替换并重启。</span></p></div>
+    </div>
+  </div>
+</section>
+
+<section id="install" style="background:var(--bg2)">
+  <div class="wrap">
+    <h2><span class="en">Installed in minutes</span><span class="fr">Installée en quelques minutes</span><span class="zh">几分钟完成安装</span></h2>
+    <div class="steps">
+      <div class="step"><h3><span class="en">Download</span><span class="fr">Télécharger</span><span class="zh">下载</span></h3>
+        <p><span class="en">Grab the latest signed .dmg from GitHub Releases and drop MeteoStation into /Applications.</span><span class="fr">Récupérez le dernier .dmg signé depuis GitHub Releases et déposez MeteoStation dans /Applications.</span><span class="zh">从 GitHub Releases 获取最新签名的 .dmg，并将 MeteoStation 拖入 /Applications。</span></p></div>
+      <div class="step"><h3><span class="en">Launch</span><span class="fr">Lancer</span><span class="zh">启动</span></h3>
+        <p><span class="en">The status bar shows the exact address your station must push to, e.g. 192.168.1.50:8642.</span><span class="fr">La barre de statut affiche l'adresse exacte vers laquelle la station doit pousser, ex. 192.168.1.50:8642.</span><span class="zh">状态栏会显示气象站需要推送到的确切地址，如 192.168.1.50:8642。</span></p></div>
+      <div class="step"><h3><span class="en">Configure the console</span><span class="fr">Configurer la console</span><span class="zh">配置控制台</span></h3>
+        <p><span class="en">Put the console in AP mode, open its web UI and enter that address in the free-URL weather service. Full guide in the repo.</span><span class="fr">Passez la console en mode AP, ouvrez son interface web et saisissez cette adresse dans le service météo à URL libre. Guide complet dans le repo.</span><span class="zh">将控制台切换到 AP 模式，打开其网页界面，在自定义 URL 气象服务中输入该地址。完整指南见仓库。</span></p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="note">
+      <span class="en">Unofficial project — not affiliated with Bresser. Works with the Bresser Weather Center 7-in-1 (WSX3001-generation console, the one with the built-in AP-mode web UI). Your station, your LAN, your data.</span>
+      <span class="fr">Projet non officiel — sans affiliation avec Bresser. Fonctionne avec la Bresser Weather Center 7-in-1 (console génération WSX3001, celle qui a l'interface web en mode AP). Votre station, votre réseau, vos données.</span>
+      <span class="zh">非官方项目——与 Bresser 无关。适用于 Bresser Weather Center 7-in-1（WSX3001 代控制台，即带 AP 模式网页界面的版本）。您的气象站、您的网络、您的数据。</span>
+    </p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>© 2026 <a href="https://lauriat.fr">Vincent Lauriat</a> ·
+      <a href="https://github.com/vincentlauriat/MeteoStation">GitHub</a> ·
+      <a href="https://github.com/vincentlauriat/MeteoStation/releases">Releases</a> ·
+      MIT</p>
+  </div>
+</footer>
+
+<script>
+  const html=document.documentElement,btns=document.querySelectorAll('.langbar button');
+  const saved=localStorage.getItem('ms-lang')||(navigator.language.startsWith('fr')?'fr':navigator.language.startsWith('zh')?'zh':'en');
+  setLang(saved);
+  btns.forEach(b=>b.addEventListener('click',()=>setLang(b.dataset.l)));
+  function setLang(l){html.dataset.lang=l;localStorage.setItem('ms-lang',l);btns.forEach(b=>b.classList.toggle('on',b.dataset.l===l));}
+</script>
+</body>
+</html>
