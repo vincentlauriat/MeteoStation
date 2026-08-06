@@ -4,6 +4,11 @@ options:
   deploymentTarget:
     macOS: "14.0"
 
+packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: "2.9.1"
+
 schemes:
   MeteoStation:
     build:
@@ -22,6 +27,8 @@ targets:
         excludes:
           - "**/*.entitlements"
           - "Info.plist"
+    dependencies:
+      - package: Sparkle
     settings:
       base:
         PRODUCT_NAME: MeteoStation
@@ -43,4 +50,7 @@ targets:
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         LSMinimumSystemVersion: "14.0"
-        NSHumanReadableCopyright: ""
+        NSHumanReadableCopyright: "© 2026 Vincent Lauriat"
+        SUFeedURL: "https://raw.githubusercontent.com/vincentlauriat/MeteoStation/main/appcast.xml"
+        SUPublicEDKey: "9PD2SBwLL4XoycyAGzaE+gO7ctuxSfuFMMajiZdXhXQ="
+        SUEnableAutomaticChecks: true
