@@ -1,0 +1,237 @@
+{
+  "name": "MeteoStation",
+  "no": "24",
+  "repo": "vincentlauriat/MeteoStation",
+  "url": "https://vincentlauriat.github.io/MeteoStation/",
+  "accent": "#7dd3fc",
+  "meta": {
+    "title": "MeteoStation — Your Bresser weather station on your Mac",
+    "description": "Native macOS app mirroring a Bresser Weather Center 7-in-1 console — all station data, live, fully local. Signed, notarized, auto-updating.",
+    "favicon": "assets/icon-256.png"
+  },
+  "role": {
+    "en": "Native macOS app mirroring a Bresser Weather Center 7-in-1 console",
+    "fr": "App macOS native reproduisant la console d'une Bresser Weather Center 7-in-1",
+    "zh": "原生 macOS 應用程式，復刻 Bresser Weather Center 7-in-1 控制台"
+  },
+  "thesis": {
+    "en": "Your weather station, on your Mac. Local. Real-time. No cloud.",
+    "fr": "Votre station météo, sur votre Mac. Local. Temps réel. Sans cloud.",
+    "zh": "您的氣象站，就在 Mac 上。本地、即時、無雲端。"
+  },
+  "lede": {
+    "en": "MeteoStation mirrors a Bresser Weather Center 7-in-1 console — the station pushes every reading straight to your Mac every ~5 seconds, over your own WiFi. No account, no cloud, no polling.",
+    "fr": "MeteoStation reproduit la console d'une Bresser Weather Center 7-in-1 — la station pousse chaque mesure directement vers votre Mac toutes les ~5 secondes, via votre propre WiFi. Sans compte, sans cloud, sans polling.",
+    "zh": "MeteoStation 復刻 Bresser Weather Center 7-in-1 控制台——氣象站每約 5 秒透過您自己的 WiFi 將讀數直接推送到 Mac。無帳戶、無雲端、無輪詢。"
+  },
+  "actions": [
+    {
+      "primary": true,
+      "href": "https://github.com/vincentlauriat/MeteoStation/releases/latest",
+      "label": {
+        "en": "Download for macOS",
+        "fr": "Télécharger pour macOS",
+        "zh": "下載 macOS 版"
+      }
+    },
+    {
+      "href": "https://github.com/vincentlauriat/MeteoStation",
+      "label": "GitHub"
+    }
+  ],
+  "facts": [
+    {
+      "k": {
+        "en": "Requires",
+        "fr": "Configuration",
+        "zh": "系統需求"
+      },
+      "v": "macOS 14+"
+    },
+    {
+      "k": {
+        "en": "Distribution",
+        "fr": "Distribution",
+        "zh": "發行"
+      },
+      "v": {
+        "en": "Developer ID signed &amp; notarized · Sparkle 2 updates",
+        "fr": "Signée Developer ID &amp; notariée · Mises à jour Sparkle 2",
+        "zh": "Developer ID 簽章並經公證 · Sparkle 2 更新"
+      }
+    },
+    {
+      "k": {
+        "en": "Licence",
+        "fr": "Licence",
+        "zh": "授權"
+      },
+      "v": {
+        "en": "MIT",
+        "fr": "MIT",
+        "zh": "MIT"
+      }
+    }
+  ],
+  "hero": {
+    "src": "assets/screenshot.png",
+    "w": 2160,
+    "h": 1624,
+    "dark": true,
+    "alt": "MeteoStation console UI with live data"
+  },
+  "opener": {
+    "h": {
+      "en": "The real console, pixel for pixel",
+      "fr": "La vraie console, au pixel près",
+      "zh": "忠實還原真實控制台"
+    }
+  },
+  "features": [
+    {
+      "h": {
+        "en": "Real-time push",
+        "fr": "Push temps réel",
+        "zh": "即時推送"
+      },
+      "p": {
+        "en": "The app embeds a tiny HTTP server; the console pushes Weather Underground frames to it every ~5 seconds. The app is the weather server.",
+        "fr": "L'app embarque un mini serveur HTTP ; la console y pousse ses trames Weather Underground toutes les ~5 secondes. L'app est le serveur météo.",
+        "zh": "應用內建微型 HTTP 伺服器；控制台每約 5 秒推送一次 Weather Underground 資料幀。應用本身就是氣象伺服器。"
+      }
+    },
+    {
+      "h": {
+        "en": "Console-style UI",
+        "fr": "Interface façon console",
+        "zh": "控制台風格介面"
+      },
+      "p": {
+        "en": "True 3×3 layout, DSEG 7-segment digits with ghost segments, wind compass, Beaufort scale, pressure graph, trend arrows, comfort smiley.",
+        "fr": "Grille 3×3 fidèle, chiffres 7 segments DSEG avec segments fantômes, boussole de vent, échelle de Beaufort, graphe de pression, flèches de tendance, smiley de confort.",
+        "zh": "忠實的 3×3 版面、DSEG 七段數碼字體、風向羅盤、蒲福風級、氣壓曲線、趨勢箭頭、舒適度表情。"
+      }
+    },
+    {
+      "h": {
+        "en": "Every sensor",
+        "fr": "Tous les capteurs",
+        "zh": "全部感測器"
+      },
+      "p": {
+        "en": "Outdoor &amp; indoor temperature and humidity, dew point, feels-like, wind, gusts, rain, UV index, solar radiation, relative pressure.",
+        "fr": "Températures et humidités extérieure/intérieure, point de rosée, ressenti, vent, rafales, pluie, indice UV, rayonnement solaire, pression relative.",
+        "zh": "室外/室內溫濕度、露點、體感溫度、風速、陣風、降雨、UV 指數、太陽輻射、相對氣壓。"
+      }
+    },
+    {
+      "h": {
+        "en": "Sun &amp; moon",
+        "fr": "Soleil &amp; lune",
+        "zh": "日月資訊"
+      },
+      "p": {
+        "en": "Sunrise/sunset computed locally (NOAA algorithm), moon phase, clock with seconds — no network lookup needed.",
+        "fr": "Lever/coucher du soleil calculés localement (algorithme NOAA), phase de lune, horloge avec secondes — aucun accès réseau nécessaire.",
+        "zh": "本地計算日出日落（NOAA 演算法）、月相、帶秒時鐘——無需連網查詢。"
+      }
+    },
+    {
+      "h": {
+        "en": "Private by design",
+        "fr": "Privé par conception",
+        "zh": "隱私優先"
+      },
+      "p": {
+        "en": "Everything stays on your LAN. Sandboxed app, 7-day local history, no account, no analytics, open source.",
+        "fr": "Tout reste sur votre réseau local. App sandboxée, historique local de 7 jours, pas de compte, zéro télémétrie, open source.",
+        "zh": "一切資料保留在區域網路內。沙盒應用、7 天本地歷史、無帳戶、無遙測、開源。"
+      }
+    },
+    {
+      "h": {
+        "en": "One-click updates",
+        "fr": "Mises à jour en un clic",
+        "zh": "一鍵更新"
+      },
+      "p": {
+        "en": "Sparkle 2 + notarized DMGs + EdDSA signatures — Check for Updates… downloads, swaps and relaunches.",
+        "fr": "Sparkle 2 + DMG notariés + signatures EdDSA — Rechercher les mises à jour… télécharge, remplace et relance.",
+        "zh": "Sparkle 2 + 已公證 DMG + EdDSA 簽章——檢查更新即可下載、替換並重新啟動。"
+      }
+    }
+  ],
+  "chapters": [
+    {
+      "id": "install",
+      "h": {
+        "en": "Installed in minutes",
+        "fr": "Installée en quelques minutes",
+        "zh": "幾分鐘完成安裝"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "items": [
+            {
+              "en": "<b>Download.</b> Grab the latest signed .dmg from GitHub Releases and drop MeteoStation into /Applications.",
+              "fr": "<b>Télécharger.</b> Récupérez le dernier .dmg signé depuis GitHub Releases et déposez MeteoStation dans /Applications.",
+              "zh": "<b>下載。</b>從 GitHub Releases 取得最新簽章的 .dmg，並將 MeteoStation 拖入 /Applications。"
+            },
+            {
+              "en": "<b>Launch.</b> The status bar shows the exact address your station must push to, e.g. 192.168.1.50:8642.",
+              "fr": "<b>Lancer.</b> La barre de statut affiche l'adresse exacte vers laquelle la station doit pousser, ex. 192.168.1.50:8642.",
+              "zh": "<b>啟動。</b>狀態列會顯示氣象站需要推送到的確切位址，如 192.168.1.50:8642。"
+            },
+            {
+              "en": "<b>Configure the console.</b> Put the console in AP mode, open its web UI and enter that address in the free-URL weather service. <a href=\"https://github.com/vincentlauriat/MeteoStation/blob/main/docs/CONFIGURATION.md\">Full guide in the repo.</a>",
+              "fr": "<b>Configurer la console.</b> Passez la console en mode AP, ouvrez son interface web et saisissez cette adresse dans le service météo à URL libre. <a href=\"https://github.com/vincentlauriat/MeteoStation/blob/main/docs/CONFIGURATION.md\">Guide complet dans le repo.</a>",
+              "zh": "<b>設定控制台。</b>將控制台切換到 AP 模式，開啟其網頁介面，在自訂 URL 氣象服務中輸入該位址。<a href=\"https://github.com/vincentlauriat/MeteoStation/blob/main/docs/CONFIGURATION.md\">完整指南見儲存庫。</a>"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "compat",
+      "h": {
+        "en": "Compatibility",
+        "fr": "Compatibilité",
+        "zh": "相容性"
+      },
+      "blocks": [
+        {
+          "type": "p",
+          "t": {
+            "en": "Unofficial project — not affiliated with Bresser. Works with the Bresser Weather Center 7-in-1 (WSX3001-generation console, the one with the built-in AP-mode web UI). Your station, your LAN, your data.",
+            "fr": "Projet non officiel — sans affiliation avec Bresser. Fonctionne avec la Bresser Weather Center 7-in-1 (console génération WSX3001, celle qui a l'interface web en mode AP). Votre station, votre réseau, vos données.",
+            "zh": "非官方專案——與 Bresser 無關。適用於 Bresser Weather Center 7-in-1（WSX3001 世代控制台，即帶 AP 模式網頁介面的版本）。您的氣象站、您的網路、您的資料。"
+          }
+        }
+      ]
+    }
+  ],
+  "close": {
+    "h": "MeteoStation",
+    "actions": [
+      {
+        "primary": true,
+        "href": "https://github.com/vincentlauriat/MeteoStation/releases/latest",
+        "label": {
+          "en": "Download for macOS",
+          "fr": "Télécharger pour macOS",
+          "zh": "下載 macOS 版"
+        }
+      },
+      {
+        "href": "https://github.com/vincentlauriat/MeteoStation/releases",
+        "label": "Releases"
+      }
+    ]
+  },
+  "colophon": {
+    "notes": [
+      "<a href=\"https://lauriat.fr\">lauriat.fr</a>"
+    ]
+  }
+}
