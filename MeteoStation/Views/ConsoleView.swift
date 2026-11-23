@@ -155,7 +155,9 @@ struct WaitingBanner: View {
                 Text("En attente de données de la station…")
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white)
-                Text("Console en mode AP ([SENSOR/WI-FI] 6 s → WiFi PWS-XXXXXX → http://192.168.1.1) → service météo à URL libre : \(model.localIP):\(String(model.port)) (protocole Wunderground).")
+                Text(model.dataSource == .relay
+                     ? "Source : relais \(model.relayAddress.isEmpty ? "(adresse à renseigner dans Réglages)" : model.relayAddress). La console doit pousser vers le relais (IP-du-Pi:8650)."
+                     : "Console en mode AP ([SENSOR/WI-FI] 6 s → WiFi PWS-XXXXXX → http://192.168.1.1) → service météo à URL libre : \(model.localIP):\(String(model.port)) (protocole Wunderground).")
                     .font(.system(size: 11, design: .rounded))
                     .foregroundStyle(ConsoleTheme.label)
                     .textSelection(.enabled)
@@ -184,15 +186,32 @@ struct StatusBarView: View {
     @EnvironmentObject private var model: StationViewModel
 
     private var statusColor: Color {
-        switch model.status {
-        case .listening: return .green
-        case .starting: return .orange
-        case .failed: return .red
-        case .stopped: return .gray
+        if model.dataSource == .relay {
+            switch model.relayStatus {
+            case .connected: return .green
+            case .connecting: return .orange
+            case .unreachable: return .red
+            case .stopped: return .gray
+            }
+        }
+        return switch model.status {
+        case .listening: .green
+        case .starting: .orange
+        case .failed: .red
+        case .stopped: .gray
         }
     }
 
     private var statusText: String {
+        if model.dataSource == .relay {
+            let host = model.relayURL?.host ?? "?"
+            switch model.relayStatus {
+            case .connected: return "Relais \(host) connecté"
+            case .connecting: return "Connexion au relais \(host)…"
+            case .unreachable(let message): return "Relais \(host) injoignable : \(message)"
+            case .stopped: return "Relais arrêté"
+            }
+        }
         switch model.status {
         case .listening(let port): return "En écoute sur \(model.localIP):\(port)"
         case .starting: return "Démarrage du serveur…"

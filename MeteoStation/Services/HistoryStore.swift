@@ -34,14 +34,44 @@ final class HistoryStore: @unchecked Sendable {
         }
     }
 
+    /// Ajoute un lot de mesures (relais, rattrapage) : ignore les dates déjà
+    /// connues et garde l'historique trié, même si le lot arrive en désordre.
+    func merge(_ batch: [WeatherReading]) {
+        guard !batch.isEmpty else { return }
+        let lastDate = readings.last?.date ?? .distantPast
+        let sortedBatch = batch.sorted { $0.date < $1.date }
+        if sortedBatch[0].date > lastDate {
+            readings.append(contentsOf: sortedBatch)
+        } else {
+            let known = Set(readings.map(\.date))
+            readings.append(contentsOf: sortedBatch.filter { !known.contains($0.date) })
+            readings.sort { $0.date < $1.date }
+        }
+        prune()
+        if Date().timeIntervalSince(lastSave) > saveInterval {
+            save()
+        }
+    }
+
     func save() {
         lastSave = Date()
         let snapshot = readings
         let url = fileURL
         DispatchQueue.global(qos: .utility).async {
-            guard let data = try? JSONEncoder().encode(snapshot) else { return }
-            try? data.write(to: url, options: .atomic)
+            Self.write(snapshot, to: url)
         }
+    }
+
+    /// Écriture synchrone, pour la fermeture de l'app : une écriture en
+    /// arrière-plan serait interrompue par la fin du processus.
+    func saveNow() {
+        lastSave = Date()
+        Self.write(readings, to: fileURL)
+    }
+
+    private static func write(_ snapshot: [WeatherReading], to url: URL) {
+        guard let data = try? JSONEncoder().encode(snapshot) else { return }
+        try? data.write(to: url, options: .atomic)
     }
 
     /// Mesures des dernières `hours` heures (pour les graphes).

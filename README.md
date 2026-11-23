@@ -16,6 +16,12 @@ The Bresser console (WSX3001 generation) can upload readings to a custom weather
 Bresser 7-in-1 sensors ──RF──▶ Console ──WiFi (WU format, ~5 s)──▶ MeteoStation (your Mac)
 ```
 
+Away from home? Point the console at a Raspberry Pi running the bundled relay (`Relay/meteorelay.py`) and read it over [Tailscale](https://tailscale.com) — see [remote access](docs/CONFIGURATION.md#remote-access-through-a-relay-raspberry-pi--tailscale).
+
+```
+Console ──WiFi──▶ Pi relay (7-day SQLite buffer) ──Tailscale──▶ MeteoStation (anywhere)
+```
+
 ## Features
 
 | Feature | Status |
@@ -33,6 +39,7 @@ Bresser 7-in-1 sensors ──RF──▶ Console ──WiFi (WU format, ~5 s)─
 | Metric/imperial units | ✅ |
 | Auto-updates (Sparkle, signed & notarized) | ✅ |
 | 7-day local history (JSON, Application Support) | ✅ |
+| Remote access via a Raspberry Pi relay over Tailscale, with history catch-up after sleep | ✅ |
 
 ## Install
 
@@ -69,12 +76,13 @@ Requires Xcode 16+ (macOS 14 deployment target) and [xcodegen](https://github.co
 MeteoStation/
 ├── project.yml              # xcodegen definition (SPM: Sparkle)
 ├── Scripts/release.sh       # signed + notarized DMG build, Sparkle appcast
+├── Relay/                   # Pi relay: meteorelay.py (stdlib HTTP + SQLite), systemd unit, install.sh
 ├── appcast.xml              # Sparkle update feed
 ├── docs/                    # configuration guide, screenshots
 └── MeteoStation/
     ├── MeteoStationApp.swift
     ├── Models/              # WeatherReading (WU parsing, unit conversion)
-    ├── Services/            # StationListener (HTTP server), HistoryStore
+    ├── Services/            # StationListener (HTTP server), RelayClient, HistoryStore
     ├── ViewModels/          # StationViewModel
     ├── Views/               # ConsoleView + console components
     └── Helpers/             # network info, moon phase, formatters

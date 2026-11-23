@@ -1,0 +1,14 @@
+[Unit]
+Description=MeteoStation relay — Bresser console uploads, served over Tailscale
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=vincent
+ExecStart=/usr/bin/python3 /opt/meteorelay/meteorelay.py
+Environment=METEORELAY_PORT=8650
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

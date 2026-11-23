@@ -39,6 +39,29 @@ The port is configurable in MeteoStation's settings (default **8642**). If your 
 
 Click **Apply**. The console leaves AP mode, reconnects to your home WiFi, and starts pushing. With firmware 2.07 the console uploads in **real-time mode, every ~5 seconds**. The app's status bar shows "last received" time; the tiles light up on the first frame.
 
+## Remote access through a relay (Raspberry Pi + Tailscale)
+
+The console can only push to **one** URL, on its own LAN. To read the station from anywhere, point the console at an always-on machine on that LAN — typically a Raspberry Pi joined to your [Tailscale](https://tailscale.com) tailnet — and let MeteoStation read from it.
+
+```
+Console ──WiFi (WU, ~5 s)──▶ Pi: Relay/meteorelay.py :8650 ──Tailscale──▶ MeteoStation (anywhere)
+                              (SQLite, 7 days)
+```
+
+**1. Install the relay on the Pi** (Python 3 standard library only, systemd service, port 8650):
+
+```bash
+Relay/install.sh <ssh-host-of-the-pi>
+```
+
+The relay stores every upload (raw parameters + receive time) for 7 days, strips the station password, and serves `GET /readings` and `GET /health` **only to Tailscale and localhost clients** — LAN clients can upload, not read.
+
+**2. Point the console at the Pi** — same procedure as Step 4 above, with the Pi's LAN address: URL `192.168.x.y:8650`. Give the Pi a DHCP reservation on your router: the console has no other way to find it.
+
+**3. Switch the app to the relay** — Settings → *Source des données* → *Relais distant*, address `http://<pi-tailscale-name>:8650` (MagicDNS name, `*.ts.net` name, or `100.x.y.z` IP). The app polls every 5 s; after the Mac sleeps or goes offline it catches up the missed history (one reading per minute for gaps over 15 min). Relay mode works at home as well, so you can leave it on.
+
+Check the relay from any tailnet machine: `curl http://<pi>:8650/health`.
+
 ## Troubleshooting
 
 | Symptom | Likely cause / fix |
@@ -46,8 +69,10 @@ Click **Apply**. The console leaves AP mode, reconnects to your home WiFi, and s
 | Console says "Configuration complete" but nothing arrives | Your Mac's IP changed since you entered it (no DHCP reservation). Check the app's status bar for the current IP and reconfigure the console. |
 | Nothing arrives at all | Verify the app is running and shows "listening" in the status bar; check `lsof -nP -iTCP:8642 -sTCP:LISTEN`; make sure the macOS firewall allows incoming connections for MeteoStation. |
 | Port refused in the console URL field | Set the app port to 80 in Settings and enter the bare IP. |
+| Relay mode: status bar says "injoignable" | Tailscale must be running on the Mac; check `curl http://<pi>:8650/health` and `systemctl status meteorelay` on the Pi. A `403` means you reached the Pi over the LAN, not Tailscale. |
+| Relay mode: connected but no new readings | The console still pushes to the old address — reconfigure it with the Pi's LAN IP and port 8650. |
 | Extra sensors (CH1…, soil…) missing | The WSX3001 firmware does not transmit extra channels on this upload service — only the main sensor array. The app displays them automatically if a firmware provides them. |
 
 ## Data & privacy
 
-Everything stays on your LAN. The app keeps a rolling 7-day history in `~/Library/Application Support/MeteoStation/history.json` (or the sandbox container equivalent). No data leaves your network.
+Everything stays on your LAN (or your private tailnet, in relay mode). The app keeps a rolling 7-day history in `~/Library/Application Support/MeteoStation/history.json` (or the sandbox container equivalent). No data leaves your network.
