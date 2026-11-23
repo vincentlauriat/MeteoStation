@@ -41,6 +41,18 @@ Console ──WiFi──▶ Pi relay (7-day SQLite buffer) ──Tailscale──
 | 7-day local history (JSON, Application Support) | ✅ |
 | Remote access via a Raspberry Pi relay over Tailscale, with history catch-up after sleep | ✅ |
 
+## iPhone / iPhone Duo
+
+An iOS companion (`MeteoStation-iOS` target, iOS 18+) reads the same relay — over Tailscale when away, or directly on the station's LAN. Built for the **iPhone Duo** foldable:
+
+| Posture | Layout |
+|---|---|
+| Folded (cover screen) | Compact vertical view: clock, outdoor, wind compass, forecast, baro/rain, 24 h pressure, indoor |
+| Unfolded (inner screen) | The full 3×3 console with HISTORY / MAX-MIN / CHANNEL, scaled to fit |
+| Half-open, portrait (tabletop) | Desk station: big clock, temperature and forecast on the upright half; pressure graph, wind and baro/rain on the flat half; nothing drawn across the fold; screen kept awake |
+
+Posture comes from `UIHingeInteraction` (iOS 27.1+) bridged into SwiftUI; other iPhones/iPads fall back to size-based layouts. The layout can also be forced in Settings. Install from Xcode (scheme `MeteoStation-iOS`, personal team) — not distributed on the App Store.
+
 ## Install
 
 Download the latest DMG from the [Releases page](https://github.com/vincentlauriat/MeteoStation/releases/latest), open it and drag **MeteoStation** to Applications. The app is signed with a Developer ID and notarized by Apple. Updates are delivered in-app via Sparkle.
@@ -78,6 +90,7 @@ MeteoStation/
 ├── Scripts/release.sh       # signed + notarized DMG build, Sparkle appcast
 ├── Relay/                   # Pi relay: meteorelay.py (stdlib HTTP + SQLite), systemd unit, install.sh
 ├── appcast.xml              # Sparkle update feed
+├── MeteoStationiOS/         # iOS app: posture/hinge bridge, compact / console / desk layouts, settings
 ├── docs/                    # configuration guide, screenshots
 └── MeteoStation/
     ├── MeteoStationApp.swift
