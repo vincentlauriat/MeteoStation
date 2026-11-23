@@ -10,6 +10,7 @@ final class HistoryStore: @unchecked Sendable {
     private let retention: TimeInterval = 7 * 24 * 3600
     private let saveInterval: TimeInterval = 120
     private var lastSave: Date = .distantPast
+    private let ioQueue = DispatchQueue(label: "com.vincentlauriat.meteostation.history-io", qos: .utility)
 
     private var fileURL: URL {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
@@ -39,13 +40,17 @@ final class HistoryStore: @unchecked Sendable {
     func merge(_ batch: [WeatherReading]) {
         guard !batch.isEmpty else { return }
         let lastDate = readings.last?.date ?? .distantPast
-        let sortedBatch = batch.sorted { $0.date < $1.date }
-        if sortedBatch[0].date > lastDate {
-            readings.append(contentsOf: sortedBatch)
-        } else {
+        let newer = batch.filter { $0.date > lastDate }.sorted { $0.date < $1.date }
+        let older = batch.filter { $0.date <= lastDate }
+        readings.append(contentsOf: newer)
+        if !older.isEmpty {
+            // Cas rare (horloge du relais recalée) : insertion triée sans doublon.
             let known = Set(readings.map(\.date))
-            readings.append(contentsOf: sortedBatch.filter { !known.contains($0.date) })
-            readings.sort { $0.date < $1.date }
+            let missing = older.filter { !known.contains($0.date) }
+            if !missing.isEmpty {
+                readings.append(contentsOf: missing)
+                readings.sort { $0.date < $1.date }
+            }
         }
         prune()
         if Date().timeIntervalSince(lastSave) > saveInterval {
@@ -57,16 +62,22 @@ final class HistoryStore: @unchecked Sendable {
         lastSave = Date()
         let snapshot = readings
         let url = fileURL
-        DispatchQueue.global(qos: .utility).async {
+        ioQueue.async {
             Self.write(snapshot, to: url)
         }
     }
 
     /// Écriture synchrone, pour la fermeture de l'app : une écriture en
-    /// arrière-plan serait interrompue par la fin du processus.
+    /// arrière-plan serait interrompue par la fin du processus. Passe par la
+    /// même file série que `save()`, pour qu'une sauvegarde plus ancienne
+    /// encore en cours ne l'écrase pas.
     func saveNow() {
         lastSave = Date()
-        Self.write(readings, to: fileURL)
+        let snapshot = readings
+        let url = fileURL
+        ioQueue.sync {
+            Self.write(snapshot, to: url)
+        }
     }
 
     private static func write(_ snapshot: [WeatherReading], to url: URL) {

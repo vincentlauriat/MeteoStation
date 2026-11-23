@@ -10,12 +10,17 @@ enum RelayStatus: Equatable {
 /// Lit les mesures stockées par le relais MeteoStation (Relay/meteorelay.py),
 /// typiquement un Raspberry Pi sur le réseau de la station, joint via Tailscale.
 ///
-/// Interroge `GET /readings?since=…` toutes les 5 s. Après une absence (Mac en
-/// veille, hors ligne), rattrape l'historique manquant, échantillonné à la minute
-/// pour ne pas rapatrier 17 000 mesures par jour.
+/// Interroge `GET /readings` toutes les 5 s. Le curseur est l'identifiant de la
+/// dernière mesure reçue du relais (`after_id`), indépendant du décodage, du
+/// dédoublonnage et de la purge côté app : il avance à chaque page non vide, la
+/// boucle de pagination ne peut donc pas tourner sur place. Seule la première
+/// requête part d'une date (la dernière mesure déjà connue localement).
+/// Après une absence de plus de 15 min, le rattrapage est échantillonné à la
+/// minute pour ne pas rapatrier 17 000 mesures par jour.
 @MainActor
 final class RelayClient {
     struct Item: Decodable {
+        let id: Int
         let t: Double
         let p: [String: String]
     }
@@ -25,7 +30,7 @@ final class RelayClient {
         let more: Bool
     }
 
-    /// Mesures reçues, dans l'ordre chronologique, avec la date de réception du relais.
+    /// Mesures reçues, dans l'ordre d'arrivée sur le relais, horodatées par le relais.
     var onReadings: (([Item]) -> Void)?
     var onStatus: ((RelayStatus) -> Void)?
 
@@ -36,6 +41,8 @@ final class RelayClient {
     private let pageSize = 2000
 
     private var task: Task<Void, Never>?
+    private var cursor: Int?
+    private var lastStatus: RelayStatus = .stopped
     private let session: URLSession = {
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = 10
@@ -44,13 +51,19 @@ final class RelayClient {
     }()
 
     /// - Parameter since: date de la dernière mesure déjà connue (nil : tout l'historique du relais).
-    func start(baseURL: URL, since: @escaping () -> Date?) {
+    func start(baseURL: URL, since: Date?) {
         stop()
-        onStatus?(.connecting)
+        cursor = nil
+        setStatus(.connecting)
+        let endpoint = Self.readingsEndpoint(baseURL)
+        let initialSince = since?.timeIntervalSince1970 ?? 0
         task = Task { [weak self] in
             while !Task.isCancelled {
-                guard let self else { return }
-                let ok = await self.poll(baseURL: baseURL, since: since)
+                guard let self, let endpoint else {
+                    self?.setStatus(.unreachable("URL du relais invalide"))
+                    return
+                }
+                let ok = await self.poll(endpoint: endpoint, initialSince: initialSince)
                 try? await Task.sleep(for: ok ? self.pollInterval : self.retryInterval)
             }
         }
@@ -59,53 +72,77 @@ final class RelayClient {
     func stop() {
         task?.cancel()
         task = nil
-        onStatus?(.stopped)
+        setStatus(.stopped)
+    }
+
+    /// `/readings` à la racine de l'hôte, quel que soit le chemin saisi par l'utilisateur.
+    private static func readingsEndpoint(_ baseURL: URL) -> URLComponents? {
+        guard var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false),
+              components.host != nil
+        else { return nil }
+        components.path = "/readings"
+        components.query = nil
+        components.fragment = nil
+        return components
+    }
+
+    private func setStatus(_ status: RelayStatus) {
+        guard status != lastStatus else { return }
+        lastStatus = status
+        onStatus?(status)
     }
 
     /// Une passe : enchaîne les pages jusqu'à être à jour. Retourne false si le relais est injoignable.
-    private func poll(baseURL: URL, since: () -> Date?) async -> Bool {
-        while !Task.isCancelled {
-            let after = since()?.timeIntervalSince1970 ?? 0
-            let gap = Date().timeIntervalSince1970 - after
-            let step = gap > catchUpThreshold ? 60 : 0
+    private func poll(endpoint: URLComponents, initialSince: Double) async -> Bool {
+        // Le mode (rattrapage ou direct) est fixé pour toute la passe.
+        let step: Int
+        if cursor == nil {
+            step = Date().timeIntervalSince1970 - initialSince > catchUpThreshold ? 60 : 0
+        } else {
+            step = 0
+        }
 
-            guard var components = URLComponents(url: baseURL.appendingPathComponent("readings"),
-                                                 resolvingAgainstBaseURL: false)
-            else {
-                onStatus?(.unreachable("URL du relais invalide"))
-                return false
-            }
-            components.queryItems = [
-                URLQueryItem(name: "since", value: String(format: "%.6f", after)),
+        while !Task.isCancelled {
+            var components = endpoint
+            var query = [
                 URLQueryItem(name: "limit", value: String(pageSize)),
                 URLQueryItem(name: "step", value: String(step)),
             ]
+            if let cursor {
+                query.append(URLQueryItem(name: "after_id", value: String(cursor)))
+            } else {
+                query.append(URLQueryItem(name: "since", value: String(initialSince)))
+            }
+            components.queryItems = query
             guard let url = components.url else {
-                onStatus?(.unreachable("URL du relais invalide"))
+                setStatus(.unreachable("URL du relais invalide"))
                 return false
             }
 
             let page: Page
             do {
                 let (data, response) = try await session.data(from: url)
+                // Arrêté ou redémarré pendant la requête : ne rien livrer.
+                if Task.isCancelled { return true }
                 if let http = response as? HTTPURLResponse, http.statusCode != 200 {
-                    onStatus?(.unreachable("HTTP \(http.statusCode)"))
+                    setStatus(.unreachable(http.statusCode == 403
+                        ? "HTTP 403 (passer par Tailscale ou activer la lecture LAN du relais)"
+                        : "HTTP \(http.statusCode)"))
                     return false
                 }
                 page = try JSONDecoder().decode(Page.self, from: data)
-            } catch is CancellationError {
-                return true
             } catch {
                 if Task.isCancelled { return true }
-                onStatus?(.unreachable(error.localizedDescription))
+                setStatus(.unreachable(error.localizedDescription))
                 return false
             }
 
-            onStatus?(.connected)
-            if !page.readings.isEmpty { onReadings?(page.readings) }
-            // Page échantillonnée pleine ou suite annoncée : continuer. Sinon on est à jour.
-            if !page.more && step == 0 { return true }
-            if page.readings.isEmpty { return true }
+            setStatus(.connected)
+            guard let lastID = page.readings.last?.id else { return true }
+            if let cursor, lastID <= cursor { return true }  // garde-fou : jamais sur place
+            cursor = lastID
+            onReadings?(page.readings)
+            if !page.more { return true }
         }
         return true
     }

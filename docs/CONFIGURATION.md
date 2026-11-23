@@ -54,7 +54,7 @@ Console ──WiFi (WU, ~5 s)──▶ Pi: Relay/meteorelay.py :8650 ──Tails
 Relay/install.sh <ssh-host-of-the-pi>
 ```
 
-The relay stores every upload (raw parameters + receive time) for 7 days, strips the station password, and serves `GET /readings` and `GET /health` **only to Tailscale and localhost clients** — LAN clients can upload, not read.
+The relay stores every upload carrying weather fields (raw parameters + receive time) for 7 days, strips the station password, and serves `GET /readings` and `GET /health` to Tailscale and localhost clients — and, with `METEORELAY_READ_LAN=1` (set in the bundled unit), to the station's LAN too, so the app can read the relay on site without Tailscale. To accept uploads from your console only, put `METEORELAY_STATION_ID=<station ID entered in the console>` in `/etc/default/meteorelay`.
 
 **2. Point the console at the Pi** — same procedure as Step 4 above, with the Pi's LAN address: URL `192.168.x.y:8650`. Give the Pi a DHCP reservation on your router: the console has no other way to find it.
 
@@ -69,7 +69,7 @@ Check the relay from any tailnet machine: `curl http://<pi>:8650/health`.
 | Console says "Configuration complete" but nothing arrives | Your Mac's IP changed since you entered it (no DHCP reservation). Check the app's status bar for the current IP and reconfigure the console. |
 | Nothing arrives at all | Verify the app is running and shows "listening" in the status bar; check `lsof -nP -iTCP:8642 -sTCP:LISTEN`; make sure the macOS firewall allows incoming connections for MeteoStation. |
 | Port refused in the console URL field | Set the app port to 80 in Settings and enter the bare IP. |
-| Relay mode: status bar says "injoignable" | Tailscale must be running on the Mac; check `curl http://<pi>:8650/health` and `systemctl status meteorelay` on the Pi. A `403` means you reached the Pi over the LAN, not Tailscale. |
+| Relay mode: status bar says "injoignable" | Tailscale must be running on the Mac; check `curl http://<pi>:8650/health` and `systemctl status meteorelay` on the Pi. A `403` means you reached the Pi from a network the relay does not serve reads to (LAN reads disabled, or a non-private network). |
 | Relay mode: connected but no new readings | The console still pushes to the old address — reconfigure it with the Pi's LAN IP and port 8650. |
 | Extra sensors (CH1…, soil…) missing | The WSX3001 firmware does not transmit extra channels on this upload service — only the main sensor array. The app displays them automatically if a firmware provides them. |
 

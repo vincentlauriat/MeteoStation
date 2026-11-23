@@ -1,12 +1,16 @@
 [Unit]
 Description=MeteoStation relay — Bresser console uploads, served over Tailscale
-After=network-online.target
+After=network-online.target time-sync.target
 Wants=network-online.target
 
 [Service]
 User=vincent
 ExecStart=/usr/bin/python3 /opt/meteorelay/meteorelay.py
 Environment=METEORELAY_PORT=8650
+# Also serve the read API to the station's LAN (read without Tailscale on site).
+Environment=METEORELAY_READ_LAN=1
+# Optional overrides (e.g. METEORELAY_STATION_ID=<console station ID>).
+EnvironmentFile=-/etc/default/meteorelay
 Restart=always
 RestartSec=5
 

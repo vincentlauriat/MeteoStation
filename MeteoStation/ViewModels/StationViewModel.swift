@@ -238,7 +238,7 @@ final class StationViewModel: ObservableObject {
                 relayStatus = .unreachable("Adresse du relais à renseigner dans les réglages")
                 return
             }
-            relay.start(baseURL: url) { [store] in store.readings.last?.date }
+            relay.start(baseURL: url, since: store.readings.last?.date)
         }
     }
 
