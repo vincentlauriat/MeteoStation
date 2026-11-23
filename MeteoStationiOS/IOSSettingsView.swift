@@ -74,6 +74,8 @@ struct IOSSettingsView: View {
                 }
             }
             .onAppear { relayText = model.relayAddress }
+            // Fermeture par glissement : ne pas perdre l'adresse saisie.
+            .onDisappear(perform: apply)
         }
         .preferredColorScheme(.dark)
     }

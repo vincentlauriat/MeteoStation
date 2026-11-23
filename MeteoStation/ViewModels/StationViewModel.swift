@@ -221,16 +221,23 @@ final class StationViewModel: ObservableObject {
         #endif
     }
 
-    /// App de nouveau au premier plan (iOS) : reprendre le relais et rattraper l'absence.
+    /// App de nouveau au premier plan (iOS) : reprendre le relais et rattraper
+    /// l'absence — seulement après un vrai passage en arrière-plan (pas après le
+    /// centre de contrôle ou une bannière, ni au lancement où init l'a déjà démarré).
     func becameActive() {
+        guard pausedInBackground else { return }
+        pausedInBackground = false
         if dataSource == .relay { startSource() }
     }
 
     /// App en arrière-plan (iOS) : sauver l'historique et cesser d'interroger le relais.
     func movedToBackground() {
+        pausedInBackground = true
         relay.stop()
         store.saveNow()
     }
+
+    private var pausedInBackground = false
 
     func restartListener() {
         guard dataSource == .local, (1...65535).contains(port) else { return }

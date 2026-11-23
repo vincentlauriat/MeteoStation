@@ -8,18 +8,20 @@ struct DuoRootView: View {
     @AppStorage("layoutOverride") private var overrideRaw = LayoutOverride.auto.rawValue
     @State private var posture: HingePosture = .none
     @State private var showSettings = false
+    @State private var layout: DuoLayout = .compact
 
     var body: some View {
         GeometryReader { geo in
-            let layout = DuoLayout.resolve(
+            let resolved = DuoLayout.resolve(
                 posture: posture,
                 size: geo.size,
-                override: LayoutOverride(rawValue: overrideRaw) ?? .auto
+                override: LayoutOverride(rawValue: overrideRaw) ?? .auto,
+                current: layout
             )
             ZStack(alignment: .topTrailing) {
                 ConsoleTheme.bezel.ignoresSafeArea()
 
-                switch layout {
+                switch resolved {
                 case .compact: CompactPhoneView()
                 case .console: ScaledConsoleView()
                 case .desk: DeskStationView()
@@ -35,11 +37,12 @@ struct DuoRootView: View {
                 }
                 .accessibilityLabel("Réglages")
             }
-            .onChange(of: layout, initial: true) { _, newLayout in
+            .onChange(of: resolved, initial: true) { _, newLayout in
+                layout = newLayout  // mémorisé pour l'hystérésis de la station de bureau
                 // Station de bureau : l'écran reste allumé, comme une vraie console.
                 UIApplication.shared.isIdleTimerDisabled = newLayout == .desk
             }
-            .animation(.easeInOut(duration: 0.25), value: layout)
+            .animation(.easeInOut(duration: 0.25), value: resolved)
         }
         .background(HingeReader(posture: $posture))
         .sheet(isPresented: $showSettings) {

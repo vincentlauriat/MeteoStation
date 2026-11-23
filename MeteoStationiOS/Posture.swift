@@ -6,6 +6,7 @@ enum HingePosture: Equatable {
     /// Pas de charnière (iPhone classique) ou état inconnu.
     case none
     case closed
+    /// Angle d'ouverture en degrés (UIHinge le fournit en radians).
     case partiallyOpen(angle: Double)
     case fullyOpen
 }
@@ -30,17 +31,26 @@ enum DuoLayout: Equatable {
 }
 
 extension DuoLayout {
-    /// Charnière entrouverte + écran en portrait (pli horizontal) → station de bureau ;
-    /// écran large (intérieur déplié, iPad) → console ; sinon vue compacte.
-    static func resolve(posture: HingePosture, size: CGSize, override: LayoutOverride) -> DuoLayout {
+    /// Plage d'angle de la station de bureau, avec hystérésis : on y entre entre
+    /// 60° et 150°, on n'en sort qu'en dehors de 50°–160°, pour éviter le
+    /// clignotement pendant qu'on ouvre ou ferme l'appareil.
+    static let deskEnter: ClosedRange<Double> = 60...150
+    static let deskStay: ClosedRange<Double> = 50...160
+
+    /// Charnière entrouverte dans la plage « bureau » + écran en portrait (pli
+    /// horizontal) → station de bureau ; écran large (intérieur déplié, iPad) →
+    /// console ; sinon vue compacte.
+    static func resolve(posture: HingePosture, size: CGSize, override: LayoutOverride,
+                        current: DuoLayout? = nil) -> DuoLayout {
         switch override {
         case .compact: return .compact
         case .console: return .console
         case .desk: return .desk
         case .auto: break
         }
-        if case .partiallyOpen = posture, size.height > size.width, size.width >= 560 {
-            return .desk
+        if case .partiallyOpen(let angle) = posture, size.height > size.width, size.width >= 560 {
+            let band = current == .desk ? deskStay : deskEnter
+            if band.contains(angle) { return .desk }
         }
         return size.width >= 560 ? .console : .compact
     }
@@ -56,9 +66,9 @@ struct HingeReader: UIViewRepresentable {
         view.isUserInteractionEnabled = false
         view.backgroundColor = .clear
         if #available(iOS 27.1, *) {
+            // Le gestionnaire est appelé sur le main actor, état initial compris.
             let interaction = UIHingeInteraction { _, update in
-                let posture = Self.posture(from: update.hinge)
-                DispatchQueue.main.async { self.posture = posture }
+                self.posture = Self.posture(from: update.hinge)
             }
             view.addInteraction(interaction)
         }
@@ -72,7 +82,7 @@ struct HingeReader: UIViewRepresentable {
         guard let hinge else { return .none }
         switch hinge.status {
         case .closed: return .closed
-        case .partiallyOpen: return .partiallyOpen(angle: Double(hinge.angle))
+        case .partiallyOpen: return .partiallyOpen(angle: Double(hinge.angle) * 180 / .pi)
         case .fullyOpen: return .fullyOpen
         default: return .none
         }
