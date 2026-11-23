@@ -1,4 +1,6 @@
+#if os(macOS)
 import AppKit
+#endif
 import Foundation
 import SwiftUI
 
@@ -171,7 +173,12 @@ final class StationViewModel: ObservableObject {
     init() {
         let saved = UserDefaults.standard.integer(forKey: "listenPort")
         port = (1...65535).contains(saved) ? saved : 8642
+        #if os(macOS)
         dataSource = DataSource(rawValue: UserDefaults.standard.string(forKey: "dataSource") ?? "") ?? .local
+        #else
+        // iOS suspend les apps en arrière-plan : l'iPhone ne peut pas servir d'écoute, il lit le relais.
+        dataSource = .relay
+        #endif
         relayAddress = UserDefaults.standard.string(forKey: "relayAddress") ?? ""
 
         store.load()
@@ -195,6 +202,7 @@ final class StationViewModel: ObservableObject {
         }
         startSource()
 
+        #if os(macOS)
         // Au réveil, rattraper tout de suite ce que le relais a reçu pendant la veille.
         NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.didWakeNotification, object: nil, queue: .main
@@ -210,7 +218,26 @@ final class StationViewModel: ObservableObject {
         ) { [store] _ in
             store.saveNow()
         }
+        #endif
     }
+
+    /// App de nouveau au premier plan (iOS) : reprendre le relais et rattraper
+    /// l'absence — seulement après un vrai passage en arrière-plan (pas après le
+    /// centre de contrôle ou une bannière, ni au lancement où init l'a déjà démarré).
+    func becameActive() {
+        guard pausedInBackground else { return }
+        pausedInBackground = false
+        if dataSource == .relay { startSource() }
+    }
+
+    /// App en arrière-plan (iOS) : sauver l'historique et cesser d'interroger le relais.
+    func movedToBackground() {
+        pausedInBackground = true
+        relay.stop()
+        store.saveNow()
+    }
+
+    private var pausedInBackground = false
 
     func restartListener() {
         guard dataSource == .local, (1...65535).contains(port) else { return }

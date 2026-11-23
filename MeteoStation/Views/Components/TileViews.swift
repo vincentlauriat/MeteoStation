@@ -34,6 +34,8 @@ struct SignalIcon: View {
 
 struct OutTileView: View {
     @EnvironmentObject private var model: StationViewModel
+    /// Agrandissement des chiffres (station de bureau iOS).
+    var scale: CGFloat = 1
 
     var body: some View {
         ScreenSection {
@@ -46,12 +48,12 @@ struct OutTileView: View {
                 Spacer(minLength: 0)
                 HStack(alignment: .lastTextBaseline, spacing: 6) {
                     LCDDigits(value: Format.temp(model.current?.tempC, imperial: false),
-                              size: 52, unit: "°C")
+                              size: 52 * scale, unit: "°C")
                     TrendArrow(trend: model.trend(of: \.tempC, threshold: 0.3))
                 }
                 HStack(alignment: .lastTextBaseline, spacing: 6) {
                     LCDDigits(value: Format.percent(model.current?.humidity),
-                              size: 38, color: ConsoleTheme.digitBlue, unit: "%")
+                              size: 38 * scale, color: ConsoleTheme.digitBlue, unit: "%")
                     TrendArrow(trend: model.trend(of: \.humidity, threshold: 2))
                 }
                 Spacer(minLength: 0)
@@ -361,40 +363,7 @@ struct HistoryStripView: View {
                         PillLabel(text: "History")
                         TechLabel(text: "Pression 24 h")
                     }
-                    if model.pressureChart.count > 1 {
-                        Chart(model.pressureChart) { point in
-                            AreaMark(x: .value("Heure", point.date), y: .value("hPa", point.hpa))
-                                .foregroundStyle(
-                                    LinearGradient(colors: [ConsoleTheme.digitBlue.opacity(0.25), .clear],
-                                                   startPoint: .top, endPoint: .bottom))
-                                .interpolationMethod(.catmullRom)
-                            LineMark(x: .value("Heure", point.date), y: .value("hPa", point.hpa))
-                                .foregroundStyle(ConsoleTheme.digitBlue)
-                                .lineStyle(StrokeStyle(lineWidth: 2))
-                                .interpolationMethod(.catmullRom)
-                        }
-                        .chartYScale(domain: .automatic(includesZero: false))
-                        .chartXAxis {
-                            AxisMarks(values: .stride(by: .hour, count: 6)) {
-                                AxisGridLine().foregroundStyle(Color.white.opacity(0.08))
-                                AxisValueLabel(format: .dateTime.hour(), anchor: .top)
-                                    .foregroundStyle(ConsoleTheme.label)
-                            }
-                        }
-                        .chartYAxis {
-                            AxisMarks {
-                                AxisGridLine().foregroundStyle(Color.white.opacity(0.08))
-                                AxisValueLabel().foregroundStyle(ConsoleTheme.label)
-                            }
-                        }
-                        .frame(height: 96)
-                    } else {
-                        Text("Historique 24 h en construction…")
-                            .font(.system(size: 11, design: .rounded))
-                            .foregroundStyle(ConsoleTheme.label)
-                            .frame(height: 96)
-                            .frame(maxWidth: .infinity)
-                    }
+                    PressureChartView(height: 96)
                 }
             }
 
@@ -435,5 +404,54 @@ struct HistoryStripView: View {
             .frame(width: 320)
         }
         .frame(height: 140)
+    }
+}
+
+// MARK: - Graphe de pression 24 h (bande HISTORY, station de bureau iOS)
+
+struct PressureChartView: View {
+    @EnvironmentObject private var model: StationViewModel
+    var height: CGFloat? = 96
+
+    var body: some View {
+        if model.pressureChart.count > 1 {
+            // L'aire part du minimum de la série, pas de 0 hPa : sinon l'axe Y
+            // s'étend jusqu'à zéro et la courbe paraît plate.
+            let floor = (model.pressureChart.map(\.hpa).min() ?? 0) - 1
+            Chart(model.pressureChart) { point in
+                AreaMark(x: .value("Heure", point.date),
+                         yStart: .value("hPa", floor),
+                         yEnd: .value("hPa", point.hpa))
+                    .foregroundStyle(
+                        LinearGradient(colors: [ConsoleTheme.digitBlue.opacity(0.25), .clear],
+                                       startPoint: .top, endPoint: .bottom))
+                    .interpolationMethod(.catmullRom)
+                LineMark(x: .value("Heure", point.date), y: .value("hPa", point.hpa))
+                    .foregroundStyle(ConsoleTheme.digitBlue)
+                    .lineStyle(StrokeStyle(lineWidth: 2))
+                    .interpolationMethod(.catmullRom)
+            }
+            .chartYScale(domain: .automatic(includesZero: false))
+            .chartXAxis {
+                AxisMarks(values: .stride(by: .hour, count: 6)) {
+                    AxisGridLine().foregroundStyle(Color.white.opacity(0.08))
+                    AxisValueLabel(format: .dateTime.hour(), anchor: .top)
+                        .foregroundStyle(ConsoleTheme.label)
+                }
+            }
+            .chartYAxis {
+                AxisMarks {
+                    AxisGridLine().foregroundStyle(Color.white.opacity(0.08))
+                    AxisValueLabel().foregroundStyle(ConsoleTheme.label)
+                }
+            }
+            .frame(height: height)
+        } else {
+            Text("Historique 24 h en construction…")
+                .font(.system(size: 11, design: .rounded))
+                .foregroundStyle(ConsoleTheme.label)
+                .frame(height: height)
+                .frame(maxWidth: .infinity)
+        }
     }
 }
