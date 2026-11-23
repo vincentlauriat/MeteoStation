@@ -42,6 +42,8 @@ final class RelayClient {
 
     private var task: Task<Void, Never>?
     private var cursor: Int?
+    /// Date (relais) de la dernière mesure reçue, pour décider du rattrapage échantillonné.
+    private var lastTime: Double?
     private var lastStatus: RelayStatus = .stopped
     private let session: URLSession = {
         let config = URLSessionConfiguration.ephemeral
@@ -54,6 +56,7 @@ final class RelayClient {
     func start(baseURL: URL, since: Date?) {
         stop()
         cursor = nil
+        lastTime = nil
         setStatus(.connecting)
         let endpoint = Self.readingsEndpoint(baseURL)
         let initialSince = since?.timeIntervalSince1970 ?? 0
@@ -75,6 +78,13 @@ final class RelayClient {
         setStatus(.stopped)
     }
 
+    /// Arrête le relais en affichant la raison (ex. adresse manquante).
+    func fail(_ message: String) {
+        task?.cancel()
+        task = nil
+        setStatus(.unreachable(message))
+    }
+
     /// `/readings` à la racine de l'hôte, quel que soit le chemin saisi par l'utilisateur.
     private static func readingsEndpoint(_ baseURL: URL) -> URLComponents? {
         guard var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false),
@@ -94,13 +104,10 @@ final class RelayClient {
 
     /// Une passe : enchaîne les pages jusqu'à être à jour. Retourne false si le relais est injoignable.
     private func poll(endpoint: URLComponents, initialSince: Double) async -> Bool {
-        // Le mode (rattrapage ou direct) est fixé pour toute la passe.
-        let step: Int
-        if cursor == nil {
-            step = Date().timeIntervalSince1970 - initialSince > catchUpThreshold ? 60 : 0
-        } else {
-            step = 0
-        }
+        // Le mode (rattrapage ou direct) est fixé pour toute la passe : échantillonné
+        // si la dernière mesure connue date de plus de 15 min (veille, coupure réseau).
+        let gap = Date().timeIntervalSince1970 - (lastTime ?? initialSince)
+        let step = gap > catchUpThreshold ? 60 : 0
 
         while !Task.isCancelled {
             var components = endpoint
@@ -141,6 +148,7 @@ final class RelayClient {
             guard let lastID = page.readings.last?.id else { return true }
             if let cursor, lastID <= cursor { return true }  // garde-fou : jamais sur place
             cursor = lastID
+            lastTime = page.readings.last?.t
             onReadings?(page.readings)
             if !page.more { return true }
         }

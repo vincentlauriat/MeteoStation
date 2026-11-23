@@ -234,8 +234,7 @@ final class StationViewModel: ObservableObject {
         case .relay:
             listener.stop()
             guard let url = relayURL else {
-                relay.stop()
-                relayStatus = .unreachable("Adresse du relais à renseigner dans les réglages")
+                relay.fail("Adresse du relais à renseigner dans les réglages")
                 return
             }
             relay.start(baseURL: url, since: store.readings.last?.date)
