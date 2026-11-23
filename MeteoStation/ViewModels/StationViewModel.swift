@@ -37,6 +37,12 @@ enum Forecast {
     }
 }
 
+/// Origine des mesures : la console pousse vers ce Mac, ou un relais (Pi) les stocke.
+enum DataSource: String, CaseIterable, Identifiable {
+    case local, relay
+    var id: String { rawValue }
+}
+
 struct PressurePoint: Identifiable {
     let id = UUID()
     let date: Date
@@ -65,7 +71,27 @@ final class StationViewModel: ObservableObject {
 
     @Published var channelIndex = 0
 
+    @Published private(set) var relayStatus: RelayStatus = .stopped
+
+    @Published var dataSource: DataSource {
+        didSet {
+            guard dataSource != oldValue else { return }
+            UserDefaults.standard.set(dataSource.rawValue, forKey: "dataSource")
+            startSource()
+        }
+    }
+
+    /// Adresse du relais, ex. `http://raspcorse:8650` (nom Tailscale) ou `http://100.x.y.z:8650`.
+    @Published var relayAddress: String {
+        didSet {
+            guard relayAddress != oldValue else { return }
+            UserDefaults.standard.set(relayAddress, forKey: "relayAddress")
+            if dataSource == .relay { startSource() }
+        }
+    }
+
     private let listener = StationListener()
+    private let relay = RelayClient()
     private let store = HistoryStore()
     private var isDemoData = false
 
@@ -145,6 +171,8 @@ final class StationViewModel: ObservableObject {
     init() {
         let saved = UserDefaults.standard.integer(forKey: "listenPort")
         port = (1...65535).contains(saved) ? saved : 8642
+        dataSource = DataSource(rawValue: UserDefaults.standard.string(forKey: "dataSource") ?? "") ?? .local
+        relayAddress = UserDefaults.standard.string(forKey: "relayAddress") ?? ""
 
         store.load()
         if let last = store.readings.last {
@@ -159,18 +187,79 @@ final class StationViewModel: ObservableObject {
         listener.onStatus = { [weak self] status in
             Task { @MainActor in self?.status = status }
         }
-        listener.start(port: UInt16(port))
+        relay.onReadings = { [weak self] items in
+            self?.ingestRelay(items)
+        }
+        relay.onStatus = { [weak self] status in
+            self?.relayStatus = status
+        }
+        startSource()
+
+        // Au réveil, rattraper tout de suite ce que le relais a reçu pendant la veille.
+        NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didWakeNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self, self.dataSource == .relay else { return }
+                self.startSource()
+            }
+        }
 
         NotificationCenter.default.addObserver(
             forName: NSApplication.willTerminateNotification, object: nil, queue: .main
         ) { [store] _ in
-            store.save()
+            store.saveNow()
         }
     }
 
     func restartListener() {
-        guard (1...65535).contains(port) else { return }
+        guard dataSource == .local, (1...65535).contains(port) else { return }
         listener.start(port: UInt16(port))
+    }
+
+    /// URL du relais normalisée (schéma http par défaut), nil si invalide.
+    var relayURL: URL? {
+        var text = relayAddress.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return nil }
+        if !text.contains("://") { text = "http://" + text }
+        guard let url = URL(string: text), url.host != nil else { return nil }
+        return url
+    }
+
+    private func startSource() {
+        switch dataSource {
+        case .local:
+            relay.stop()
+            restartListener()
+        case .relay:
+            listener.stop()
+            guard let url = relayURL else {
+                relay.fail("Adresse du relais à renseigner dans les réglages")
+                return
+            }
+            relay.start(baseURL: url, since: store.readings.last?.date)
+        }
+    }
+
+    private func ingestRelay(_ items: [RelayClient.Item]) {
+        let readings = items.compactMap { item in
+            WeatherReading(wuParams: item.p, date: Date(timeIntervalSince1970: item.t))
+        }
+        guard let latest = readings.last else { return }
+        if isDemoData {
+            demoMode = false
+            isDemoData = false
+        }
+        store.merge(readings)
+        if let newest = store.readings.last, newest.date >= (current?.date ?? .distantPast) {
+            current = newest
+            lastReceived = newest.date
+        }
+        lastRawRequest = "relais · " + latest.raw
+            .sorted { $0.key < $1.key }
+            .map { "\($0.key)=\($0.value)" }
+            .joined(separator: "&")
+        refreshChart()
     }
 
     private func ingest(params: [String: String], raw: String) {

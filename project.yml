@@ -35,8 +35,8 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.vincentlauriat.meteostation
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         SWIFT_VERSION: "5.9"
-        MARKETING_VERSION: "1.0.0"
-        CURRENT_PROJECT_VERSION: "1"
+        MARKETING_VERSION: "1.1.0"
+        CURRENT_PROJECT_VERSION: "2"
         MACOSX_DEPLOYMENT_TARGET: "14.0"
         CODE_SIGN_ENTITLEMENTS: MeteoStation/MeteoStation.entitlements
         CODE_SIGN_IDENTITY: "-"
@@ -54,3 +54,11 @@ targets:
         SUFeedURL: "https://raw.githubusercontent.com/vincentlauriat/MeteoStation/main/appcast.xml"
         SUPublicEDKey: "9PD2SBwLL4XoycyAGzaE+gO7ctuxSfuFMMajiZdXhXQ="
         SUEnableAutomaticChecks: true
+        # Relay over Tailscale is plain HTTP (WireGuard already encrypts it):
+        # bare hostnames / IPs (local networking) and MagicDNS *.ts.net names.
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+          NSExceptionDomains:
+            ts.net:
+              NSIncludesSubdomains: true
+              NSExceptionAllowsInsecureHTTPLoads: true
