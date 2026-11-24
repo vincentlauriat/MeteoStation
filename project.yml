@@ -8,8 +8,8 @@ options:
 # One version for both apps (macOS + iOS): bump here, release checklist checks both.
 settings:
   base:
-    MARKETING_VERSION: "1.1.0"
-    CURRENT_PROJECT_VERSION: "2"
+    MARKETING_VERSION: "1.1.1"
+    CURRENT_PROJECT_VERSION: "3"
 
 packages:
   Sparkle:
@@ -65,6 +65,9 @@ targets:
         SUFeedURL: "https://raw.githubusercontent.com/vincentlauriat/MeteoStation/main/appcast.xml"
         SUPublicEDKey: "9PD2SBwLL4XoycyAGzaE+gO7ctuxSfuFMMajiZdXhXQ="
         SUEnableAutomaticChecks: true
+        # Sandboxed app: Sparkle must launch its installer through the XPC launcher
+        # service (paired with the mach-lookup exceptions in the entitlements).
+        SUEnableInstallerLauncherService: true
         # Relay over Tailscale is plain HTTP (WireGuard already encrypts it):
         # bare hostnames / IPs (local networking) and MagicDNS *.ts.net names.
         NSAppTransportSecurity:
