@@ -46,7 +46,11 @@
         "fr": "Configuration",
         "zh": "系統需求"
       },
-      "v": "macOS 14+"
+      "v": {
+        "en": "macOS 14+ · iOS 18+ (from source)",
+        "fr": "macOS 14+ · iOS 18+ (depuis les sources)",
+        "zh": "macOS 14+ · iOS 18+（從原始碼建置）"
+      }
     },
     {
       "k": {
@@ -102,6 +106,30 @@
     },
     {
       "h": {
+        "en": "Remote access",
+        "fr": "Accès à distance",
+        "zh": "遠端存取"
+      },
+      "p": {
+        "en": "Away from home? The console pushes to a small relay on a Raspberry Pi (7-day SQLite buffer); MeteoStation reads it over Tailscale from anywhere and catches up the history it missed while asleep.",
+        "fr": "Loin de chez vous ? La console pousse vers un petit relais sur un Raspberry Pi (tampon SQLite de 7 jours) ; MeteoStation le lit via Tailscale depuis n'importe où et rattrape l'historique manqué pendant la veille.",
+        "zh": "不在家？控制台將資料推送至 Raspberry Pi 上的小型中繼（7 天 SQLite 緩衝）；MeteoStation 透過 Tailscale 隨處讀取，並補齊休眠期間遺漏的歷史資料。"
+      }
+    },
+    {
+      "h": {
+        "en": "iPhone &amp; iPhone Duo",
+        "fr": "iPhone &amp; iPhone Duo",
+        "zh": "iPhone 與 iPhone Duo"
+      },
+      "p": {
+        "en": "An iOS companion reads the same relay. On the iPhone Duo it follows the hinge: compact view folded, full console unfolded, desk station half-open. Built from source with Xcode.",
+        "fr": "Une app iOS compagnon lit le même relais. Sur l'iPhone Duo, elle suit la charnière : vue compacte plié, console complète déplié, station de bureau entrouvert. À compiler depuis les sources avec Xcode.",
+        "zh": "iOS 配套應用讀取同一個中繼。在 iPhone Duo 上隨轉軸切換：摺疊時為精簡檢視，展開時為完整控制台，半開時為桌面氣象站。需以 Xcode 從原始碼建置。"
+      }
+    },
+    {
+      "h": {
         "en": "Console-style UI",
         "fr": "Interface façon console",
         "zh": "控制台風格介面"
@@ -143,9 +171,9 @@
         "zh": "隱私優先"
       },
       "p": {
-        "en": "Everything stays on your LAN. Sandboxed app, 7-day local history, no account, no analytics, open source.",
-        "fr": "Tout reste sur votre réseau local. App sandboxée, historique local de 7 jours, pas de compte, zéro télémétrie, open source.",
-        "zh": "一切資料保留在區域網路內。沙盒應用、7 天本地歷史、無帳戶、無遙測、開源。"
+        "en": "Everything stays on your own network — your LAN, or your private Tailscale network when away. Sandboxed app, 7-day local history, no account, no analytics, open source.",
+        "fr": "Tout reste sur votre propre réseau — le réseau local, ou votre réseau Tailscale privé à distance. App sandboxée, historique local de 7 jours, pas de compte, zéro télémétrie, open source.",
+        "zh": "一切資料都留在您自己的網路——區域網路，或外出時的私人 Tailscale 網路。沙盒應用、7 天本地歷史、無帳戶、無遙測、開源。"
       }
     },
     {

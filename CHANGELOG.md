@@ -1,12 +1,12 @@
 # Changelog
 
-## 1.1.0 (iOS) — unreleased
+## 1.1.0 (iOS) — 2026-11-24
 
 - New iOS app (`MeteoStation-iOS`, iOS 18+) reading the Pi relay, sharing the macOS models, relay client, history and console components.
 - iPhone Duo: folded → compact view, unfolded → full console, half-open portrait between 60° and 150° → desk station (split around the fold, screen kept awake, hysteresis against flicker). Hinge state via `UIHingeInteraction` (iOS 27.1+); layout can be forced in Settings.
 - Pressure graph area now starts at the series minimum instead of 0 hPa (the curve looked flat) — macOS too.
 
-## 1.1.0 — unreleased
+## 1.1.0 — 2026-11-24
 
 - Remote access: new relay (`Relay/meteorelay.py`, Python stdlib + SQLite, systemd) to run on an always-on machine on the station's LAN (e.g. a Raspberry Pi). The console pushes to it; MeteoStation reads it over Tailscale.
 - New *Source des données* setting: local station or remote relay. Relay mode polls every 5 s and catches up missed history after sleep (sampled per minute beyond 15 min), keeping the relay's receive times.
