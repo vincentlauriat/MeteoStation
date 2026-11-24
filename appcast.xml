@@ -6,16 +6,16 @@
     <description>MeteoStation release feed</description>
     <language>en</language>
     <item>
-      <title>v1.1.0</title>
-      <pubDate>Tue, 24 Nov 2026 22:32:41 +0100</pubDate>
-      <sparkle:version>2</sparkle:version>
-      <sparkle:shortVersionString>1.1.0</sparkle:shortVersionString>
+      <title>v1.1.1</title>
+      <pubDate>Tue, 24 Nov 2026 23:51:18 +0100</pubDate>
+      <sparkle:version>3</sparkle:version>
+      <sparkle:shortVersionString>1.1.1</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <sparkle:releaseNotesLink>https://github.com/vincentlauriat/MeteoStation/releases/tag/v1.1.0</sparkle:releaseNotesLink>
+      <sparkle:releaseNotesLink>https://github.com/vincentlauriat/MeteoStation/releases/tag/v1.1.1</sparkle:releaseNotesLink>
       <enclosure
-        url="https://github.com/vincentlauriat/MeteoStation/releases/download/v1.1.0/MeteoStation-1.1.0.dmg"
+        url="https://github.com/vincentlauriat/MeteoStation/releases/download/v1.1.1/MeteoStation-1.1.1.dmg"
         type="application/octet-stream"
-        sparkle:edSignature="dIAOUEpQOK/3mRMZxS3KKfpLfK47aDfM9BYoTmxr+XeqevKlLPv/3vcpGOYglBj/Ti2g6iC5+9qHee024t6YBw==" length="1982480" />
+        sparkle:edSignature="xbLuX23J2WYc+Jo5VdfENXKNnC/e6HSlXBrgUroHaEElX+y7iwAyhbgHV/4YcNkHOfL0cmvCv8W/syF8qHRTBw==" length="1992936" />
     </item>
   </channel>
 </rss>
