@@ -57,20 +57,107 @@ struct DuoRootView: View {
 
 // MARK: - Déplié : la console complète, mise à l'échelle
 
-/// La console macOS (grille 3×3 + boutons du boîtier) rendue à sa taille de
-/// conception puis réduite pour tenir dans l'écran intérieur, sans recomposer la mise en page.
+/// La console rendue à une taille de conception fixe puis mise à l'échelle de
+/// l'écran intérieur. En paysage, c'est la console macOS (grille 3×3, 1040 pt de
+/// large) ; en portrait, une console recomposée sur deux colonnes (680 pt), qui
+/// évite de réduire la grille paysage à ~64 % sur l'écran intérieur de l'iPhone Duo.
 struct ScaledConsoleView: View {
+    @EnvironmentObject private var model: StationViewModel
     @AppStorage("showHistory") private var showHistory = true
 
     var body: some View {
         GeometryReader { geo in
-            let design = CGSize(width: 1040, height: showHistory ? 780 : 640)
+            let portrait = geo.size.height > geo.size.width * 1.15
+            let design = portrait
+                ? CGSize(width: PortraitConsoleView.width, height: PortraitConsoleView.height(showHistory: showHistory, waiting: model.current == nil))
+                : CGSize(width: 1040, height: showHistory ? 780 : 640)
             let scale = min(geo.size.width / design.width, geo.size.height / design.height)
-            ConsoleView()
-                .frame(width: design.width, height: design.height)
-                .scaleEffect(scale)
-                .frame(width: geo.size.width, height: geo.size.height)
+            Group {
+                if portrait { PortraitConsoleView() } else { ConsoleView() }
+            }
+            .frame(width: design.width, height: design.height)
+            .scaleEffect(scale)
+            .frame(width: geo.size.width, height: geo.size.height)
         }
+    }
+}
+
+/// Console déplié en portrait : les mêmes tuiles que la console 3×3, sur deux
+/// colonnes, et les boutons du boîtier en rangée sous l'écran.
+struct PortraitConsoleView: View {
+    @EnvironmentObject private var model: StationViewModel
+    @AppStorage("showHistory") private var showHistory = true
+
+    static let width: CGFloat = 680
+    /// Hauteur de conception : grille et bande d'historique ont des hauteurs fixes,
+    /// le bandeau « en attente » (pas encore de mesure) ajoute ~100 pt.
+    static func height(showHistory: Bool, waiting: Bool) -> CGFloat {
+        (showHistory ? 1150 : 1000) + (waiting ? 100 : 0)
+    }
+
+    var body: some View {
+        VStack(spacing: 8) {
+            VStack(spacing: 10) {
+                Text("METEOSTATION")
+                    .font(.system(size: 13, weight: .heavy, design: .rounded))
+                    .tracking(6)
+                    .foregroundStyle(Color.white.opacity(0.35))
+
+                if model.current == nil {
+                    WaitingBanner()
+                }
+
+                Grid(horizontalSpacing: 10, verticalSpacing: 10) {
+                    GridRow {
+                        OutTileView()
+                        InTileView()
+                    }
+                    .frame(height: 250)
+                    GridRow {
+                        ScreenSection {
+                            VStack(alignment: .leading, spacing: 4) {
+                                PillLabel(text: "Wind")
+                                WindCompassView(reading: model.current)
+                            }
+                        }
+                        VStack(spacing: 10) {
+                            ForecastTileView(forecast: model.forecast)
+                                .frame(height: 112)
+                            BaroRainTileView()
+                                .frame(maxHeight: .infinity)
+                        }
+                    }
+                    .frame(height: 290)
+                    GridRow {
+                        IndexTileView(reading: model.current)
+                        SunTileView(reading: model.current)
+                    }
+                    .frame(height: 108)
+                    GridRow {
+                        DateTileView()
+                        TimeTileView()
+                    }
+                    .frame(height: 138)
+                }
+
+                if showHistory {
+                    HistoryStripView()
+                }
+
+                StatusBarView()
+            }
+            .padding(14)
+            .frame(maxHeight: .infinity, alignment: .top)
+            .background(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(ConsoleTheme.screen)
+            )
+
+            BezelButtonsView(showHistory: $showHistory, horizontal: true)
+        }
+        .padding([.horizontal, .top], 12)
+        .frame(width: Self.width, height: Self.height(showHistory: showHistory, waiting: model.current == nil))
+        .background(ConsoleTheme.bezel)
     }
 }
 

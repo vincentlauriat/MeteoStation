@@ -72,20 +72,31 @@ struct ConsoleView: View {
 struct BezelButtonsView: View {
     @EnvironmentObject private var model: StationViewModel
     @Binding var showHistory: Bool
+    /// Boutons en rangée sous l'écran (console portrait iOS) au lieu d'une colonne à droite.
+    var horizontal = false
     @State private var showMaxMin = false
 
     var body: some View {
-        VStack(spacing: 14) {
-            Spacer()
-            bezelButton("HISTORY") { showHistory.toggle() }
-            bezelButton("MAX\nMIN") { showMaxMin.toggle() }
-                .popover(isPresented: $showMaxMin, arrowEdge: .leading) {
-                    MaxMinPopover(stats: model.todayStats)
-                }
-            bezelButton("CHANNEL") { model.cycleChannel() }
-            Spacer()
+        if horizontal {
+            HStack(spacing: 18) { buttons }
+                .frame(height: 50)
+        } else {
+            VStack(spacing: 14) {
+                Spacer()
+                buttons
+                Spacer()
+            }
+            .frame(width: 74)
         }
-        .frame(width: 74)
+    }
+
+    @ViewBuilder private var buttons: some View {
+        bezelButton("HISTORY") { showHistory.toggle() }
+        bezelButton("MAX\nMIN") { showMaxMin.toggle() }
+            .popover(isPresented: $showMaxMin, arrowEdge: horizontal ? .top : .leading) {
+                MaxMinPopover(stats: model.todayStats)
+            }
+        bezelButton("CHANNEL") { model.cycleChannel() }
     }
 
     private func bezelButton(_ title: String, action: @escaping () -> Void) -> some View {
