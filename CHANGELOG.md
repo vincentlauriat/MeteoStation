@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- iOS: unfolded portrait shows a two-column console instead of the scaled-down landscape grid.
+
 ## 1.1.0 (iOS) — 2026-11-24
 
 - New iOS app (`MeteoStation-iOS`, iOS 18+) reading the Pi relay, sharing the macOS models, relay client, history and console components.
