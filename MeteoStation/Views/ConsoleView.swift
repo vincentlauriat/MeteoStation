@@ -93,7 +93,7 @@ struct BezelButtonsView: View {
     @ViewBuilder private var buttons: some View {
         bezelButton("HISTORY") { showHistory.toggle() }
         bezelButton("MAX\nMIN") { showMaxMin.toggle() }
-            .popover(isPresented: $showMaxMin, arrowEdge: horizontal ? .bottom : .leading) {
+            .popover(isPresented: $showMaxMin, arrowEdge: horizontal ? .top : .leading) {
                 MaxMinPopover(stats: model.todayStats)
             }
         bezelButton("CHANNEL") { model.cycleChannel() }
