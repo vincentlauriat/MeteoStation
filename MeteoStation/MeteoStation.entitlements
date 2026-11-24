@@ -8,5 +8,13 @@
 	<true/>
 	<key>com.apple.security.network.client</key>
 	<true/>
+	<!-- Sparkle installer connection and status (sandboxed updates).
+	     Literal bundle id: Scripts/release.sh signs with this file directly,
+	     so build settings are not expanded here. -->
+	<key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
+	<array>
+		<string>com.vincentlauriat.meteostation-spks</string>
+		<string>com.vincentlauriat.meteostation-spki</string>
+	</array>
 </dict>
 </plist>

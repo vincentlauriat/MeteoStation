@@ -1,7 +1,8 @@
 # Changelog
 
-## Unreleased
+## 1.1.1 — 2026-11-24
 
+- Fix: Sparkle could download updates but never install them, because the sandboxed app did not enable Sparkle's installer launcher service (`SUEnableInstallerLauncherService`) nor the `-spks`/`-spki` mach-lookup exceptions. **1.0.0 and 1.1.0 cannot update themselves: install 1.1.1 once by hand from the DMG**; later updates are automatic.
 - iOS: unfolded portrait shows a two-column console instead of the scaled-down landscape grid.
 
 ## 1.1.0 (iOS) — 2026-11-24

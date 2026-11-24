@@ -55,7 +55,7 @@ Posture comes from `UIHingeInteraction` (iOS 27.1+) bridged into SwiftUI; other 
 
 ## Install
 
-Download the latest DMG from the [Releases page](https://github.com/vincentlauriat/MeteoStation/releases/latest), open it and drag **MeteoStation** to Applications. The app is signed with a Developer ID and notarized by Apple. Updates are delivered in-app via Sparkle.
+Download the latest DMG from the [Releases page](https://github.com/vincentlauriat/MeteoStation/releases/latest), open it and drag **MeteoStation** to Applications. The app is signed with a Developer ID and notarized by Apple. Updates are delivered in-app via Sparkle. **Coming from 1.0.0 or 1.1.0?** Those versions cannot install updates themselves (sandbox configuration bug): download 1.1.1 once by hand; later updates are automatic.
 
 ## Configure your station
 
@@ -105,6 +105,7 @@ MeteoStation/
 
 - [x] v1.0.0 — local listener + console UI + Sparkle auto-update
 - [x] v1.1.0 — remote access through a Pi relay over Tailscale + iOS / iPhone Duo companion
+- [x] v1.1.1 — Sparkle updates install again in the sandboxed app; iOS portrait console
 - [ ] Menu bar extra
 - [ ] Threshold notifications
 - [ ] CSV export
