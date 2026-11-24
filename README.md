@@ -104,6 +104,7 @@ MeteoStation/
 ## Roadmap
 
 - [x] v1.0.0 — local listener + console UI + Sparkle auto-update
+- [x] v1.1.0 — remote access through a Pi relay over Tailscale + iOS / iPhone Duo companion
 - [ ] Menu bar extra
 - [ ] Threshold notifications
 - [ ] CSV export
